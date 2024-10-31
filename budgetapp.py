@@ -3,7 +3,6 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 # Initialize an in-memory database for the budget
-# Normally you'd use a database, but for simplicity, we'll use lists here
 budget_data = {
     "income": [],
     "expenses": []
@@ -15,7 +14,6 @@ def index():
     total_expenses = sum(item['amount'] for item in budget_data["expenses"])
     balance = total_income - total_expenses
 
-    # Render budgetindex.html instead of index.html
     return render_template("budgetindex.html", 
                            income=budget_data["income"], 
                            expenses=budget_data["expenses"],
@@ -36,6 +34,20 @@ def add_expense():
     description = request.form.get('description')
     amount = float(request.form.get('amount'))
     budget_data["expenses"].append({"category": category, "description": description, "amount": amount})
+    return redirect(url_for('index'))
+
+# Route to remove an income item by index
+@app.route('/remove_income/<int:index>', methods=['POST'])
+def remove_income(index):
+    if 0 <= index < len(budget_data["income"]):
+        del budget_data["income"][index]
+    return redirect(url_for('index'))
+
+# Route to remove an expense item by index
+@app.route('/remove_expense/<int:index>', methods=['POST'])
+def remove_expense(index):
+    if 0 <= index < len(budget_data["expenses"]):
+        del budget_data["expenses"][index]
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
